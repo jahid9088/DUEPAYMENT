@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Telegram Due Manager</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      background: #f4f7fb;
+      color: #111827;
+    }
+
+    .app {
+      max-width: 1100px;
+      margin: auto;
+      padding: 16px;
+    }
+
+    .header {
+      background: white;
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .header p {
+      margin: 5px 0 0;
+      color: #6b7280;
+      font-size: 13px;
+    }
+
+    .status {
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 9px 13px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 18px;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+    }
+
+    .stat-card span {
+      color: #6b7280;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .stat-card h2 {
+      margin: 8px 0 0;
+      font-size: 24px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 330px 1fr;
+      gap: 16px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.07);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #374151;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 12px;
+      outline: none;
+      font-size: 14px;
+      margin-bottom: 12px;
+      background: white;
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
+    }
+
+    .btn {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      background: #e5e7eb;
+      color: #111827;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn.primary {
+      background: #2563eb;
+      color: white;
+    }
+
+    .form-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .search {
+      margin-bottom: 14px;
+    }
+
+    .client-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .client {
+      border: 1px solid #e5e7eb;
+      border-radius: 18px;
+      padding: 14px;
+      background: white;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+    }
+
+    .client h3 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .username {
+      color: #2563eb;
+      font-weight: bold;
+      margin-top: 5px;
+      display: inline-block;
+      text-decoration: none;
+    }
+
+    .meta {
+      color: #6b7280;
+      font-size: 13px;
+      margin-top: 7px;
+      line-height: 1.5;
+    }
+
+    .amounts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .amount-box {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 8px 10px;
+      min-width: 95px;
+    }
+
+    .amount-box small {
+      color: #6b7280;
+      display: block;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .amount-box b {
+      display: block;
+      margin-top: 3px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-top: 7px;
+    }
+
+    .paid {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .due {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .currency-badge {
+      background: #dbeafe;
+      color: #1e40af;
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 6px;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 105px;
+    }
+
+    .small-btn {
+      border: none;
+      padding: 9px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .small-btn.blue {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .small-btn.green {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .small-btn.red {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .small-btn.gray {
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 35px 15px;
+      color: #6b7280;
+      border: 1px dashed #cbd5e1;
+      border-radius: 18px;
+    }
+
+    .toast {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: #111827;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 999px;
+      opacity: 0;
+      transition: 0.25s;
+      z-index: 999;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .client {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="toast" class="toast">Done</div>
+
+  <div class="app">
+
+    <div class="header">
+      <div>
+        <h1>Telegram Due Manager</h1>
+        <p>INR / USDT payment database system</p>
+      </div>
+      <div id="status" class="status">Ready</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <span>INR Due</span>
+        <h2 id="inrDue">₹0</h2>
+      </div>
+
+      <div class="stat-card">
+        <span>INR Paid</span>
+        <h2 id="inrPaid">₹0</h2>
+      </div>
+
+      <div class="stat-card">
+        <span>USDT Due</span>
+        <h2 id="usdtDue">0 USDT</h2>
+      </div>
+
+      <div class="stat-card">
+        <span>USDT Paid</span>
+        <h2 id="usdtPaid">0 USDT</h2>
+      </div>
+    </div>
+
+    <div class="layout">
+
+      <div class="card">
+        <h2 id="formTitle">Add Client</h2>
+
+        <form id="clientForm">
+          <input type="hidden" id="editId">
+
+          <label>Telegram Username</label>
+          <input type="text" id="username" placeholder="@username" required>
+
+          <label>Tool Name</label>
+          <input type="text" id="toolName" placeholder="Example: Trading Tool APK" required>
+
+          <label>Payment Type</label>
+          <select id="currency" required>
+            <option value="INR">INR</option>
+            <option value="USDT">USDT</option>
+          </select>
+
+          <label>Amount</label>
+          <input type="number" id="amount" placeholder="1500" step="0.0001" required>
+
+          <label>Note Optional</label>
+          <textarea id="note" placeholder="Optional note..."></textarea>
+
+          <div class="form-actions">
+            <button class="btn primary" type="submit">Save</button>
+            <button class="btn" type="button" onclick="resetForm()">Reset</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Client List</h2>
+
+        <input class="search" type="text" id="searchBox" placeholder="Search username, tool, INR, USDT..." oninput="renderList()">
+
+        <div id="clientList" class="client-list"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    /****************************************************
+     * FIREBASE DATABASE SETTINGS
+     ****************************************************/
+    const DB_URL = "https://fundue-7a7fa-default-rtdb.firebaseio.com";
+    const DB_NODE = "telegram_clients";
+
+    let clients = {};
+
+    function $(id) {
+      return document.getElementById(id);
+    }
+
+    function showToast(msg) {
+      const toast = $("toast");
+      toast.textContent = msg;
+      toast.classList.add("show");
+
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2200);
+    }
+
+    function setStatus(msg, type = "normal") {
+      const status = $("status");
+      status.textContent = msg;
+
+      if (type === "error") {
+        status.style.background = "#fee2e2";
+        status.style.color = "#991b1b";
+      } else if (type === "success") {
+        status.style.background = "#dcfce7";
+        status.style.color = "#166534";
+      } else {
+        status.style.background = "#e0f2fe";
+        status.style.color = "#0369a1";
+      }
+    }
+
+    function money(amount, currency) {
+      amount = Number(amount || 0);
+      currency = currency || "INR";
+
+      if (currency === "USDT") {
+        return amount.toLocaleString("en-US", {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 4
+        }) + " USDT";
+      }
+
+      return "₹" + amount.toLocaleString("en-IN", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function cleanUsername(username) {
+      username = String(username || "").trim();
+      username = username.replace(/^@+/, "");
+      return username;
+    }
+
+    function usernameWithAt(username) {
+      const u = cleanUsername(username);
+      return u ? "@" + u : "";
+    }
+
+    function createId() {
+      return "client_" + Date.now() + "_" + Math.random().toString(36).substring(2, 8);
+    }
+
+    function getCurrency(client) {
+      return client.currency || "INR";
+    }
+
+    function getDue(client) {
+      const amount = Number(client.amount || 0);
+      const paid = Number(client.paidAmount || 0);
+      return Math.max(0, amount - paid);
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "-";
+
+      const d = new Date(value);
+
+      return d.toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    function apiUrl(path = "") {
+      return DB_URL + "/" + DB_NODE + path + ".json";
+    }
+
+    async function firebaseGet() {
+      const res = await fetch(apiUrl());
+      if (!res.ok) throw new Error("Database load failed");
+      return await res.json();
+    }
+
+    async function firebasePut(id, data) {
+      const res = await fetch(apiUrl("/" + id), {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!res.ok) throw new Error("Database save failed");
+      return await res.json();
+    }
+
+    async function firebasePatch(id, data) {
+      const res = await fetch(apiUrl("/" + id), {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!res.ok) throw new Error("Database update failed");
+      return await res.json();
+    }
+
+    async function firebaseDelete(id) {
+      const res = await fetch(apiUrl("/" + id), {
+        method: "DELETE"
+      });
+
+      if (!res.ok) throw new Error("Database delete failed");
+      return await res.json();
+    }
+
+    async function loadClients() {
+      try {
+        setStatus("Loading...");
+        const data = await firebaseGet();
+        clients = data || {};
+        renderAll();
+        setStatus("Database Connected", "success");
+      } catch (e) {
+        console.error(e);
+        setStatus("Database Error", "error");
+        showToast("Firebase rules ya database URL check karo");
+      }
+    }
+
+    async function saveClient(event) {
+      event.preventDefault();
+
+      const editId = $("editId").value.trim();
+      const id = editId || createId();
+
+      const username = usernameWithAt($("username").value);
+      const toolName = $("toolName").value.trim();
+      const currency = $("currency").value;
+      const amount = Number($("amount").value || 0);
+      const note = $("note").value.trim();
+
+      if (!username) {
+        showToast("Telegram username required");
+        return;
+      }
+
+      if (!toolName) {
+        showToast("Tool name required");
+        return;
+      }
+
+      if (!currency) {
+        showToast("Payment type select karo");
+        return;
+      }
+
+      if (amount <= 0) {
+        showToast("Amount invalid");
+        return;
+      }
+
+      const oldData = clients[id] || {};
+      const now = new Date().toISOString();
+
+      const oldPaid = Number(oldData.paidAmount || 0);
+      const finalPaid = Math.min(oldPaid, amount);
+
+      const clientData = {
+        id: id,
+        username: username,
+        toolName: toolName,
+        currency: currency,
+        amount: amount,
+        paidAmount: finalPaid,
+        note: note,
+        createdAt: oldData.createdAt || now,
+        updatedAt: now
+      };
+
+      try {
+        setStatus("Saving...");
+        await firebasePut(id, clientData);
+
+        clients[id] = clientData;
+        resetForm();
+        renderAll();
+
+        setStatus("Saved", "success");
+        showToast("Client saved");
+      } catch (e) {
+        console.error(e);
+        setStatus("Save Error", "error");
+        showToast("Save failed");
+      }
+    }
+
+    function editClient(id) {
+      const c = clients[id];
+      if (!c) return;
+
+      $("editId").value = c.id;
+      $("username").value = c.username || "";
+      $("toolName").value = c.toolName || "";
+      $("currency").value = getCurrency(c);
+      $("amount").value = c.amount || "";
+      $("note").value = c.note || "";
+
+      $("formTitle").textContent = "Edit Client";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function deleteClient(id) {
+      if (!confirm("Delete this client?")) return;
+
+      try {
+        setStatus("Deleting...");
+        await firebaseDelete(id);
+
+        delete clients[id];
+        renderAll();
+
+        setStatus("Deleted", "success");
+        showToast("Client deleted");
+      } catch (e) {
+        console.error(e);
+        setStatus("Delete Error", "error");
+        showToast("Delete failed");
+      }
+    }
+
+    async function addPayment(id) {
+      const c = clients[id];
+      if (!c) return;
+
+      const currency = getCurrency(c);
+      const due = getDue(c);
+
+      if (due <= 0) {
+        showToast("Already paid");
+        return;
+      }
+
+      const amount = prompt("Paid amount enter karo. Due: " + money(due, currency), due);
+
+      if (amount === null) return;
+
+      const paidNow = Number(amount || 0);
+
+      if (paidNow <= 0) {
+        showToast("Invalid amount");
+        return;
+      }
+
+      const newPaid = Math.min(Number(c.paidAmount || 0) + paidNow, Number(c.amount || 0));
+      const now = new Date().toISOString();
+
+      try {
+        setStatus("Updating payment...");
+
+        await firebasePatch(id, {
+          paidAmount: newPaid,
+          updatedAt: now
+        });
+
+        clients[id].paidAmount = newPaid;
+        clients[id].updatedAt = now;
+
+        renderAll();
+        setStatus("Payment Updated", "success");
+        showToast("Payment updated");
+      } catch (e) {
+        console.error(e);
+        setStatus("Payment Error", "error");
+        showToast("Payment update failed");
+      }
+    }
+
+    async function markPaid(id) {
+      const c = clients[id];
+      if (!c) return;
+
+      if (!confirm("Mark full paid?")) return;
+
+      const now = new Date().toISOString();
+
+      try {
+        setStatus("Updating...");
+
+        await firebasePatch(id, {
+          paidAmount: Number(c.amount || 0),
+          updatedAt: now
+        });
+
+        clients[id].paidAmount = Number(c.amount || 0);
+        clients[id].updatedAt = now;
+
+        renderAll();
+        setStatus("Marked Paid", "success");
+        showToast("Full paid done");
+      } catch (e) {
+        console.error(e);
+        setStatus("Update Error", "error");
+        showToast("Update failed");
+      }
+    }
+
+    function resetForm() {
+      $("clientForm").reset();
+      $("editId").value = "";
+      $("currency").value = "INR";
+      $("formTitle").textContent = "Add Client";
+    }
+
+    function copyMessage(id) {
+      const c = clients[id];
+      if (!c) return;
+
+      const currency = getCurrency(c);
+      const due = getDue(c);
+
+      const message =
+`Hi ${c.username},
+
+Payment reminder for your tool/service.
+
+Tool: ${c.toolName}
+Payment Type: ${currency}
+Total Amount: ${money(c.amount, currency)}
+Paid Amount: ${money(c.paidAmount, currency)}
+Pending Due: ${money(due, currency)}
+Created Date/Time: ${formatDateTime(c.createdAt)}
+
+Please clear the pending amount and send payment screenshot.
+
+Thank you.`;
+
+      navigator.clipboard.writeText(message)
+        .then(() => showToast("Message copied"))
+        .catch(() => {
+          const textarea = document.createElement("textarea");
+          textarea.value = message;
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand("copy");
+          textarea.remove();
+          showToast("Message copied");
+        });
+    }
+
+    function openTelegram(username) {
+      const u = cleanUsername(username);
+
+      if (!u) {
+        showToast("Username missing");
+        return;
+      }
+
+      window.open("https://t.me/" + encodeURIComponent(u), "_blank");
+    }
+
+    function renderStats() {
+      const arr = Object.values(clients || {});
+
+      let inrDue = 0;
+      let inrPaid = 0;
+      let usdtDue = 0;
+      let usdtPaid = 0;
+
+      arr.forEach(c => {
+        const currency = getCurrency(c);
+        const due = getDue(c);
+        const paid = Number(c.paidAmount || 0);
+
+        if (currency === "USDT") {
+          usdtDue += due;
+          usdtPaid += paid;
+        } else {
+          inrDue += due;
+          inrPaid += paid;
+        }
+      });
+
+      $("inrDue").textContent = money(inrDue, "INR");
+      $("inrPaid").textContent = money(inrPaid, "INR");
+      $("usdtDue").textContent = money(usdtDue, "USDT");
+      $("usdtPaid").textContent = money(usdtPaid, "USDT");
+    }
+
+    function renderList() {
+      const list = $("clientList");
+      const query = $("searchBox").value.toLowerCase().trim();
+
+      const arr = Object.values(clients || {}).filter(c => {
+        const text = [
+          c.username,
+          c.toolName,
+          c.currency,
+          c.note
+        ].join(" ").toLowerCase();
+
+        return text.includes(query);
+      }).sort((a, b) => {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+
+      if (arr.length === 0) {
+        list.innerHTML = `
+          <div class="empty">
+            No client found. Add your first Telegram client.
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = arr.map(c => {
+        const currency = getCurrency(c);
+        const due = getDue(c);
+        const isPaid = due <= 0;
+
+        return `
+          <div class="client">
+            <div>
+              <h3>${escapeHtml(c.toolName)}</h3>
+
+              <a class="username" href="https://t.me/${encodeURIComponent(cleanUsername(c.username))}" target="_blank">
+                ${escapeHtml(c.username)}
+              </a>
+
+              <span class="currency-badge">${escapeHtml(currency)}</span>
+
+              <br>
+
+              <span class="badge ${isPaid ? "paid" : "due"}">
+                ${isPaid ? "Paid" : "Due Pending"}
+              </span>
+
+              <div class="meta">
+                Created: ${escapeHtml(formatDateTime(c.createdAt))}
+                <br>
+                Updated: ${escapeHtml(formatDateTime(c.updatedAt))}
+                ${c.note ? `<br>Note: ${escapeHtml(c.note)}` : ""}
+              </div>
+
+              <div class="amounts">
+                <div class="amount-box">
+                  <small>Amount</small>
+                  <b>${money(c.amount, currency)}</b>
+                </div>
+
+                <div class="amount-box">
+                  <small>Paid</small>
+                  <b>${money(c.paidAmount, currency)}</b>
+                </div>
+
+                <div class="amount-box">
+                  <small>Due</small>
+                  <b style="color:${due > 0 ? '#dc2626' : '#16a34a'}">${money(due, currency)}</b>
+                </div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="small-btn blue" data-action="copy" data-id="${c.id}">Copy Msg</button>
+              <button class="small-btn blue" data-action="telegram" data-id="${c.id}">Telegram</button>
+              <button class="small-btn green" data-action="addPaid" data-id="${c.id}">Add Paid</button>
+              <button class="small-btn green" data-action="fullPaid" data-id="${c.id}">Full Paid</button>
+              <button class="small-btn gray" data-action="edit" data-id="${c.id}">Edit</button>
+              <button class="small-btn red" data-action="delete" data-id="${c.id}">Delete</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderAll() {
+      renderStats();
+      renderList();
+    }
+
+    function escapeHtml(text) {
+      return String(text || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    document.addEventListener("click", function(e) {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+
+      const action = btn.dataset.action;
+      const id = btn.dataset.id;
+
+      if (action === "copy") copyMessage(id);
+      if (action === "telegram") openTelegram(clients[id].username);
+      if (action === "addPaid") addPayment(id);
+      if (action === "fullPaid") markPaid(id);
+      if (action === "edit") editClient(id);
+      if (action === "delete") deleteClient(id);
+    });
+
+    $("clientForm").addEventListener("submit", saveClient);
+
+    document.addEventListener("DOMContentLoaded", () => {
+      resetForm();
+      loadClients();
+    });
+  </script>
+
+</body>
+</html>
